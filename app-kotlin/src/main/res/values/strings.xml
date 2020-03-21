@@ -1,0 +1,8 @@
+<resources>
+  <string name="app_name">ReactiveBeaconsKotlin</string>
+    <string name="save_all">Save all</string>
+    <string name="distance">Distance: %fm</string>
+    <string name="proximity">Proximity: %s</string>
+    <string name="rssi">RSSI: %d</string>
+  <string name="loading_beacons">Loading beacons...</string>
+</resources>

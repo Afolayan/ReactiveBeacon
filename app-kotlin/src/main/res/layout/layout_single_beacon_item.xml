@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="5dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="10dp">
+
+        <ImageView
+            android:id="@+id/beaconIcon"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:contentDescription="@string/app_name"
+            android:src="@mipmap/ic_launcher"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tvBeaconName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:ellipsize="end"
+            android:maxLength="20"
+            app:layout_constraintStart_toEndOf="@id/beaconIcon"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Beacon name is a very long name" />
+
+        <TextView
+            android:id="@+id/tvBeaconMac"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:ellipsize="end"
+            android:maxLength="25"
+            app:layout_constraintStart_toEndOf="@id/beaconIcon"
+            app:layout_constraintTop_toBottomOf="@id/tvBeaconName"
+            tools:text="MacID: 09:09:12:123:34:45" />
+
+        <TextView
+            android:id="@+id/tvBeaconDistance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:ellipsize="end"
+            android:maxLength="25"
+            app:layout_constraintStart_toEndOf="@id/beaconIcon"
+            app:layout_constraintTop_toBottomOf="@id/tvBeaconMac"
+            tools:text="Distance: 5km" />
+
+        <TextView
+            android:id="@+id/tvBeaconProximity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:ellipsize="end"
+            android:maxLength="25"
+            app:layout_constraintStart_toEndOf="@id/beaconIcon"
+            app:layout_constraintTop_toBottomOf="@id/tvBeaconDistance"
+            tools:text="Proximity: 5km" />
+
+
+        <ImageButton
+            android:id="@+id/pushToDbButton"
+            android:layout_width="50dp"
+            android:layout_height="40dp"
+            android:cropToPadding="true"
+            android:src="@drawable/ic_save_items"
+            android:textAllCaps="false"
+            android:textColor="#FFF"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Save" />
+
+        <TextView
+            android:id="@+id/beaconRssi"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:ellipsize="end"
+            android:maxLength="25"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/pushToDbButton"
+            tools:text="Rssi: 5km" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.cardview.widget.CardView>

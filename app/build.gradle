@@ -1,0 +1,24 @@
+apply plugin: 'com.android.application'
+
+android {
+  compileSdkVersion rootProject.ext.compileSdkVersion
+  buildToolsVersion rootProject.ext.buildToolsVersion
+
+  defaultConfig {
+    minSdkVersion rootProject.ext.minSdkVersion
+    targetSdkVersion rootProject.ext.compileSdkVersion
+    applicationId "com.github.pwittchen.reactivebeacons"
+    versionCode 1
+    versionName "1.0"
+  }
+
+  lintOptions {
+    disable 'MissingTranslation'
+  }
+}
+
+dependencies {
+  implementation project(':library')
+  implementation deps.rxandroid2
+  implementation deps.appcompatv7
+}

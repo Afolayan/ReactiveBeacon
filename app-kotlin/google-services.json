@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "169052096474",
+    "firebase_url": "https://reactive-beacons.firebaseio.com",
+    "project_id": "reactive-beacons",
+    "storage_bucket": "reactive-beacons.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:169052096474:android:133ed0d006a18eb5b022e3",
+        "android_client_info": {
+          "package_name": "com.github.pwittchen.reactivebeacons.kotlinapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "169052096474-col7bl2q4pkfodd69519soc6ogo1a32h.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.github.pwittchen.reactivebeacons.kotlinapp",
+            "certificate_hash": "7832d9f7b2f9fb6622f695475621f74738944a7a"
+          }
+        },
+        {
+          "client_id": "169052096474-4op6eku28s3q6uivpm145b9neaebf99r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDSPugyjfR_r0kXJLXnrJcrhPsGZY7DYAA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "169052096474-4op6eku28s3q6uivpm145b9neaebf99r.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
