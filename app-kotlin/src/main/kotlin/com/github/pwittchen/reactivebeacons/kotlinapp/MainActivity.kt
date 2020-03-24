@@ -5,6 +5,7 @@ import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.annotation.SuppressLint
 import android.location.Address
 import android.location.Geocoder
+import android.location.Location
 import android.os.Build
 import android.os.Bundle
 import android.os.Looper
@@ -23,14 +24,22 @@ import com.github.pwittchen.reactivebeacons.library.rx2.ReactiveBeacons
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
+import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationServices.getFusedLocationProviderClient
 import com.google.firebase.FirebaseApp
 import com.google.firebase.firestore.FirebaseFirestore
+import io.reactivex.Observable
+import io.reactivex.ObservableEmitter
+import io.reactivex.ObservableOnSubscribe
+import io.reactivex.ObservableSource
+import io.reactivex.Observer
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.annotations.NonNull
 import io.reactivex.disposables.Disposable
+import io.reactivex.internal.operators.observable.ObservableObserveOn
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.*
+import org.reactivestreams.Subscriber
 import java.util.*
 import kotlin.collections.HashSet
 
@@ -49,7 +58,7 @@ class MainActivity : AppCompatActivity() {
     private val UPDATE_INTERVAL: Long = 10 * 1000  /* 10 secs */
     private val FASTEST_INTERVAL: Long = 2000 /* 2 sec */
 
-    private val geocoder = Geocoder(this, Locale.getDefault())
+    private val geocoder = Geocoder(this)
     private var addressList = listOf<Address>()
 
     companion object {
@@ -73,28 +82,38 @@ class MainActivity : AppCompatActivity() {
 
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult?) {
+                Log.e(TAG, "locationResult: $locationResult")
                 locationResult ?: return
 
-                processLocationInfo(locationResult)
+                processLocationInfo(locationResult.lastLocation)
             }
         }
     }
 
-    private fun processLocationInfo(locationResult: LocationResult) {
-        val lastLocation = locationResult.lastLocation
+    private fun processLocationInfo(lastLocation: Location) {
+        Log.e(TAG, "lastLocation: $lastLocation")
         Thread(
                 Runnable {
-                    addressList =
-                            geocoder.getFromLocation(lastLocation.latitude, lastLocation.longitude, 1)
-                    val address = addressList[0].getAddressLine(0)
-                    val city = addressList[0].locality
-                    val state = addressList[0].adminArea
-                    val zip = addressList[0].postalCode
-                    val country = addressList[0].countryName
+                    try{
+                        addressList =
+                                geocoder.getFromLocation(lastLocation.latitude, lastLocation.longitude, 1)
+                        val address = addressList[0]
+                        val addressLine = address.getAddressLine(0)
+                        val city = address.locality
+                        val state = address.adminArea
+                        val zip = address.postalCode
+                        val country = address.countryName
 
-                    val addressString = "$address, $city ($zip), $state, $country"
-                    userLocationTextView.visibility = View.VISIBLE
-                    userLocationTextView.text = addressString
+                        runOnUiThread {
+                            val addressString = "$addressLine, $city, $state, $country"
+                            userLocationTextView.visibility = View.VISIBLE
+                            userLocationTextView.text = addressString
+                        }
+                    } catch (ex: java.lang.Exception){
+                        Log.e(TAG, "exception thrown: ", ex)
+                    }
+
+
                 }
         ).start()
 
@@ -122,6 +141,33 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun getLocation(lastLocation: Location): Observable<Address> {
+        return Observable.create { emitter ->
+            try {
+                addressList =
+                        geocoder.getFromLocation(lastLocation.latitude, lastLocation.longitude, 1)
+
+                emitter.onNext(addressList[0])
+                emitter.onComplete()
+            }  catch (e: Exception) {
+                emitter.onError(e)
+            }
+        }
+    }
+
+    private fun processAddressInfo(address: Address) {
+        Log.e(TAG, "address: $address")
+        val addressLine = address.getAddressLine(0)
+        val city = address.locality
+        val state = address.adminArea
+        val zip = address.postalCode
+        val country = address.countryName
+
+        val addressString = "$addressLine, $city ($zip), $state, $country"
+        userLocationTextView.visibility = View.VISIBLE
+        userLocationTextView.text = addressString
+    }
+
     private fun startLocationUpdates() {
         // Create the location request to start receiving updates
         mLocationRequest = LocationRequest()
@@ -130,11 +176,37 @@ class MainActivity : AppCompatActivity() {
             interval = UPDATE_INTERVAL
             fastestInterval = FASTEST_INTERVAL
         }
-
         val fusedLocationClient = getFusedLocationProviderClient(this)
         fusedLocationClient.requestLocationUpdates(mLocationRequest,
                 locationCallback,
                 Looper.getMainLooper())
+
+        fusedLocationClient.lastLocation
+                .addOnSuccessListener { location : Location? ->
+                    location?.apply {
+                        getLocation(this)
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe(object : Observer<Address> {
+                                    override fun onComplete() {
+                                        Log.e("MainActivity", "location subscriber is complete")
+                                    }
+
+                                    override fun onSubscribe(d: Disposable) {
+                                        Log.e("MainActivity", "location subscriber is on")
+                                    }
+
+                                    override fun onNext(address: Address) {
+                                        processAddressInfo(address)
+                                    }
+
+                                    override fun onError(e: Throwable) {
+                                        Log.e("MainActivity", "error is: ", e)
+                                    }
+
+                                })
+                    }
+                }
     }
 
     private fun canObserveBeacons(): Boolean {
@@ -172,7 +244,6 @@ class MainActivity : AppCompatActivity() {
         val firebaseReadyList = beacons.values.map {
             FirebaseBeacon.fromBeacon(it)
         }
-        Log.e("MainA: ", "firebaseReadyList is ${firebaseReadyList.size}")
         loaderLayout.visibility = GONE
         beaconsRecyclerView.apply {
             layoutManager = LinearLayoutManager(this@MainActivity)

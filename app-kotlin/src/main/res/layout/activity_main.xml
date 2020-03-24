@@ -20,8 +20,11 @@
         android:layout_height="wrap_content"
         tools:text="@string/loading_beacons"
         android:layout_below="@id/toolbar"
+        android:layout_marginStart="@dimen/activity_horizontal_margin"
+        android:layout_marginEnd="@dimen/activity_horizontal_margin"
         android:visibility="gone"
         tools:visibility="visible"
+        android:textColor="#000"
         android:textSize="14sp" />
 
     <androidx.recyclerview.widget.RecyclerView
