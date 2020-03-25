@@ -24,27 +24,22 @@ import com.github.pwittchen.reactivebeacons.library.rx2.ReactiveBeacons
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
-import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationServices.getFusedLocationProviderClient
 import com.google.firebase.FirebaseApp
 import com.google.firebase.firestore.FirebaseFirestore
 import io.reactivex.Observable
-import io.reactivex.ObservableEmitter
-import io.reactivex.ObservableOnSubscribe
-import io.reactivex.ObservableSource
 import io.reactivex.Observer
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.annotations.NonNull
 import io.reactivex.disposables.Disposable
-import io.reactivex.internal.operators.observable.ObservableObserveOn
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.*
-import org.reactivestreams.Subscriber
 import java.util.*
 import kotlin.collections.HashSet
 
 
 const val DB_BEACONS = "beacons"
+const val DB_LOCATIONS = "test_locations"
 
 class MainActivity : AppCompatActivity() {
 
@@ -108,6 +103,14 @@ class MainActivity : AppCompatActivity() {
                             val addressString = "$addressLine, $city, $state, $country"
                             userLocationTextView.visibility = View.VISIBLE
                             userLocationTextView.text = addressString
+
+                            saveLocationToDb(
+                                    FirebaseLocation(addressString,
+                                            lastLocation.latitude,
+                                            lastLocation.longitude,
+                                            Date()
+                                    )
+                            )
                         }
                     } catch (ex: java.lang.Exception){
                         Log.e(TAG, "exception thrown: ", ex)
@@ -155,7 +158,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun processAddressInfo(address: Address) {
+    private fun processAddressInfo(address: Address, location: Location) {
         Log.e(TAG, "address: $address")
         val addressLine = address.getAddressLine(0)
         val city = address.locality
@@ -166,6 +169,14 @@ class MainActivity : AppCompatActivity() {
         val addressString = "$addressLine, $city ($zip), $state, $country"
         userLocationTextView.visibility = View.VISIBLE
         userLocationTextView.text = addressString
+
+        saveLocationToDb(
+                FirebaseLocation(addressString,
+                        location.latitude,
+                        location.longitude,
+                        Date()
+                )
+        )
     }
 
     private fun startLocationUpdates() {
@@ -197,7 +208,7 @@ class MainActivity : AppCompatActivity() {
                                     }
 
                                     override fun onNext(address: Address) {
-                                        processAddressInfo(address)
+                                        processAddressInfo(address, this@apply)
                                     }
 
                                     override fun onError(e: Throwable) {
@@ -305,24 +316,38 @@ class MainActivity : AppCompatActivity() {
 
     private fun saveToDb(beacon: FirebaseBeacon) {
 
-        beacon.date = Date()
-//        if (firebaseBeaconListId.contains(beacon.macAddress)){
-//
-//            //firebaseFirestore.collection(DB_BEACONS).do("macAddress", beacon.macAddress).
-//            return
-//        }
-        // Add a new document with a generated ID
+        beacon.timestamp = Date()
         firebaseFirestore.collection(DB_BEACONS)
                 .add(beacon)
                 .addOnSuccessListener { documentReference ->
                     firebaseBeaconListId = firebaseBeaconListId.plusElement(beacon.macAddress!!)
+                    Log.d(TAG, "DocumentSnapshot added with ID: ${documentReference.id}")
+                    Toast
+                            .makeText(applicationContext,
+                                    "Beacon saved successfully.",
+                                    Toast.LENGTH_SHORT)
+                            .show()
+                }
+                .addOnFailureListener { e ->
+                    Log.w(TAG, "Error adding document", e)
+                    Toast
+                            .makeText(applicationContext,
+                                    "Could not save this beacon at this time. Please try again later.",
+                                    Toast.LENGTH_SHORT)
+                            .show()
+                }
+    }
+
+    private fun saveLocationToDb(firebaseLocation: FirebaseLocation){
+        firebaseFirestore.collection(DB_LOCATIONS)
+                .add(firebaseLocation)
+                .addOnSuccessListener { documentReference ->
                     Log.d(TAG, "DocumentSnapshot added with ID: ${documentReference.id}")
                 }
                 .addOnFailureListener { e ->
                     Log.w(TAG, "Error adding document", e)
                 }
     }
-
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
         return super.onCreateOptionsMenu(menu)

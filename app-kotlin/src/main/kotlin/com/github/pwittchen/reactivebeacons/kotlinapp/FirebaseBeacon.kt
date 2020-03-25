@@ -9,7 +9,7 @@ data class FirebaseBeacon (
         val distance: Double = 0.0,
         val proximityDescription: String? = null,
         val rssi: Int = 0,
-        var date: Date? = null
+        var timestamp: Date? = null
 ) {
     companion object {
         @JvmStatic
@@ -25,3 +25,10 @@ data class FirebaseBeacon (
     }
 
 }
+
+data class FirebaseLocation (
+        val address: String? = null,
+        val latitude: Double = 0.0,
+        val longitude: Double = 0.0,
+        val timestamp: Date? = null
+)
