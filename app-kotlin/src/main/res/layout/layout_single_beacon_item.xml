@@ -87,8 +87,8 @@
             android:layout_marginStart="5dp"
             android:ellipsize="end"
             android:maxLength="25"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/pushToDbButton"
+            app:layout_constraintStart_toEndOf="@+id/beaconIcon"
+            app:layout_constraintTop_toBottomOf="@id/tvBeaconProximity"
             tools:text="Rssi: 5km" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
