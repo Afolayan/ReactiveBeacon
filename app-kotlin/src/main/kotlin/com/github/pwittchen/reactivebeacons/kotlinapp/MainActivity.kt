@@ -101,7 +101,7 @@ class MainActivity : AppCompatActivity() {
 
                         runOnUiThread {
                             val addressString = "$addressLine, $city, $state, $country"
-                            userLocationTextView.visibility = View.VISIBLE
+                            userLocationTextView.visibility = GONE
                             userLocationTextView.text = addressString
 
                             saveLocationToDb(
@@ -167,7 +167,7 @@ class MainActivity : AppCompatActivity() {
         val country = address.countryName
 
         val addressString = "$addressLine, $city ($zip), $state, $country"
-        userLocationTextView.visibility = View.VISIBLE
+        userLocationTextView.visibility = GONE
         userLocationTextView.text = addressString
 
         saveLocationToDb(
@@ -261,12 +261,10 @@ class MainActivity : AppCompatActivity() {
             adapter = BeaconRecyclerAdapter(
                     beacons.values.toList()
             ) {
-                saveToDb(it)
+                val message = "Mac ID ${it.macAddress} pushed to db."
+                saveToDb(it, message)
             }
         }
-        //beacons.values.forEach(this::saveToDb)
-
-        //lv_beacons.adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, list)
     }
 
     override fun onPause() {
@@ -314,7 +312,7 @@ class MainActivity : AppCompatActivity() {
         return ActivityCompat.checkSelfPermission(this, permission) == PERMISSION_GRANTED
     }
 
-    private fun saveToDb(beacon: FirebaseBeacon) {
+    private fun saveToDb(beacon: FirebaseBeacon, message: String?) {
 
         beacon.timestamp = Date()
         firebaseFirestore.collection(DB_BEACONS)
@@ -322,11 +320,13 @@ class MainActivity : AppCompatActivity() {
                 .addOnSuccessListener { documentReference ->
                     firebaseBeaconListId = firebaseBeaconListId.plusElement(beacon.macAddress!!)
                     Log.d(TAG, "DocumentSnapshot added with ID: ${documentReference.id}")
-                    Toast
-                            .makeText(applicationContext,
-                                    "Beacon saved successfully.",
-                                    Toast.LENGTH_SHORT)
-                            .show()
+                    message?.let {
+                        Toast.makeText(applicationContext,
+                                        message,
+                                        Toast.LENGTH_SHORT)
+                                .show()
+                    }
+
                 }
                 .addOnFailureListener { e ->
                     Log.w(TAG, "Error adding document", e)
@@ -358,8 +358,10 @@ class MainActivity : AppCompatActivity() {
             R.id.menuSaveAll -> {
                 beacons.values.forEach { beacon ->
                     val firebaseBeacon = FirebaseBeacon.fromBeacon(beacon)
-                    saveToDb(firebaseBeacon)
+                    saveToDb(firebaseBeacon, null)
                 }
+                val message = "All detected BLE scan pushed to db."
+                Toast.makeText(applicationContext, message, Toast.LENGTH_SHORT).show()
             }
         }
         return super.onOptionsItemSelected(item)
