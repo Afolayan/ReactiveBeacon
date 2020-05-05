@@ -101,7 +101,6 @@ class MainActivity : AppCompatActivity() {
 
                         runOnUiThread {
                             val addressString = "$addressLine, $city, $state, $country"
-                            userLocationTextView.visibility = GONE
                             userLocationTextView.text = addressString
 
                             saveLocationToDb(
